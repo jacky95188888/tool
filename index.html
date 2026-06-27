@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一鍵複製・貼文工具</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: 20px 16px 60px;
+    font-family: -apple-system, "PingFang TC", "Helvetica Neue", sans-serif;
+    background: #ece8df;
+    color: #2c2c2c;
+  }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  .sub { color: #8a857a; font-size: 16px; margin: 0 0 26px; }
+  .card {
+    background: #fbf9f3;
+    border-radius: 22px;
+    padding: 22px 18px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .label { font-weight: 700; font-size: 18px; color: #b35a2e; margin: 0 0 14px; }
+  textarea {
+    width: 100%;
+    min-height: 200px;
+    border: 1px solid #e3ddd0;
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 17px;
+    font-family: inherit;
+    resize: vertical;
+    background: #fff;
+    color: #2c2c2c;
+  }
+  textarea::placeholder { color: #b3aea3; }
+  .copy-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 18px;
+    border: none;
+    border-radius: 16px;
+    background: #c0622f;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .copy-btn:active { background: #a8521f; }
+  .hint { text-align: center; color: #8a857a; font-size: 15px; margin: 14px 0 0; }
+  .tpl-btn {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 20px;
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tpl-btn:last-child { margin-bottom: 0; }
+  .tpl-btn:active { filter: brightness(0.92); }
+  .t1 { background: #5b6b86; }
+  .t2 { background: #7a5d7e; }
+  .t3 { background: #6e8472; }
+  .t4 { background: #b58a4c; }
+  .t5 { background: #c0622f; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 40px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 26px;
+    border-radius: 30px;
+    font-size: 16px;
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<h1>一鍵複製・貼文工具</h1>
+<p class="sub">貼上文字 → 按複製 → 直接去 FB / LINE 貼上</p>
+
+<div class="card">
+  <p class="label">📝 你的貼文內容</p>
+  <textarea id="content" placeholder="把要發的文字貼這裡……"></textarea>
+  <button class="copy-btn" onclick="copyAll()">一鍵複製全部</button>
+  <p class="hint">複製後就能直接到任何地方長按貼上</p>
+</div>
+
+<div class="card">
+  <p class="label">⚡ 範本切換</p>
+  <button class="tpl-btn t1" onclick="loadTpl('tianheng')">天衡・九維命理</button>
+  <button class="tpl-btn t2" onclick="loadTpl('expert')">專家決策團</button>
+  <button class="tpl-btn t3" onclick="loadTpl('dream')">夢境圖書館</button>
+  <button class="tpl-btn t4" onclick="loadTpl('toolbox')">萬能工具箱</button>
+  <button class="tpl-btn t5" onclick="loadTpl('teaching')">教學</button>
+</div>
+
+<div id="toast">已複製！</div>
+
+<script>
+  var LINE = "https://lin.ee/YewRM1L";
+
+  var templates = {
+    tianheng:
+"🔮 天衡・九維命理\n\n" +
+"輸入你的生辰，就能看到一份結構化的命盤分析。\n" +
+"不是算命機，而是幫你看懂自己的入門工具。\n\n" +
+"八字、紫微、十神、身強身弱，一次整理給你看。\n\n" +
+"👉 免費試用：jacky95188888.github.io/-/\n\n" +
+"LINE：" + LINE,
+
+    expert:
+"🧠 專家決策團\n\n" +
+"遇到難決定的事？讓 190 位 AI 專家幫你想。\n" +
+"40 個專業團隊，從不同角度給你建議。\n\n" +
+"創業、投資、人生選擇，講出你的難題，\n" +
+"幾秒鐘就有一份完整的決策分析。\n\n" +
+"👉 免費試用：jacky95188888.github.io/expert-council/\n\n" +
+"LINE：" + LINE,
+
+    dream:
+"🌙 夢境圖書館\n\n" +
+"昨晚做了奇怪的夢？讓 Luna 陪你解開。\n" +
+"記錄你的夢，AI 幫你看見夢裡的訊息。\n\n" +
+"一個專屬於你的夢境收藏空間。\n\n" +
+"👉 免費體驗：jacky95188888.github.io/dream-library/\n\n" +
+"LINE：" + LINE,
+
+    toolbox:
+"🧰 萬能工具箱\n\n" +
+"一支手機就能用的 AI 工具箱，免安裝、打開就能玩。\n" +
+"我是三寶爸，用一支 iPhone 做出來的。\n\n" +
+"👉 試用連結：【這裡換成你的新連結】\n" +
+"解鎖碼：MING872\n\n" +
+"LINE：" + LINE,
+
+    teaching:
+"📱 一支手機，零基礎，做出自己的 AI 工具\n\n" +
+"我是三寶爸，不會寫程式，\n" +
+"用一支 iPhone 養活一家五口，\n" +
+"從零做出了好幾個上線的 AI 工具。\n\n" +
+"如果你也想學，這條路我走過，可以帶你走。\n" +
+"想了解的留言「+1」，我私訊你 🙌\n\n" +
+"LINE：" + LINE
+  };
+
+  function loadTpl(key) {
+    document.getElementById("content").value = templates[key];
+  }
+
+  function copyAll() {
+    var txt = document.getElementById("content").value;
+    if (!txt.trim()) { showToast("還沒有內容喔"); return; }
+    var ta = document.getElementById("content");
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, txt.length);
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt).then(function(){ showToast("已複製！"); }).catch(function(){ if(ok) showToast("已複製！"); });
+    } else {
+      showToast(ok ? "已複製！" : "請手動長按複製");
+    }
+    if (navigator.clipboard) {} else if (ok) {}
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 1600);
+  }
+</script>
+
+</body>
+</html>

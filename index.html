@@ -111,6 +111,22 @@
 
 <script>
   var LINE = "https://lin.ee/YewRM1L";
+  var TOOLBOX = "https://htmlpreview.github.io/?https://gist.githubusercontent.com/jacky95188888/f9671939b9ad4aca00bd265953d8fbf3/raw/index.html";
+
+  // 每個工具範本結尾都接上的安裝說明
+  var INSTALL =
+"\n\n" +
+"📲 加到主畫面（像 App 一樣用）\n\n" +
+"iPhone（請用 Safari 開啟）\n" +
+"1. 用 Safari 打開本頁\n" +
+"2. 點下方中間的「分享」鈕\n" +
+"3. 往下找「加入主畫面」\n" +
+"4. 按「加入」就完成\n\n" +
+"Android（請用 Chrome 開啟）\n" +
+"1. 用 Chrome 打開本頁\n" +
+"2. 點右上角「⋮」選單\n" +
+"3. 點「加到主畫面 / 安裝應用程式」\n" +
+"4. 按「新增」就完成";
 
   var templates = {
     tianheng:
@@ -119,7 +135,7 @@
 "不是算命機，而是幫你看懂自己的入門工具。\n\n" +
 "八字、紫微、十神、身強身弱，一次整理給你看。\n\n" +
 "👉 免費試用：jacky95188888.github.io/-/\n\n" +
-"LINE：" + LINE,
+"LINE：" + LINE + INSTALL,
 
     expert:
 "🧠 專家決策團\n\n" +
@@ -128,7 +144,7 @@
 "創業、投資、人生選擇，講出你的難題，\n" +
 "幾秒鐘就有一份完整的決策分析。\n\n" +
 "👉 免費試用：jacky95188888.github.io/expert-council/\n\n" +
-"LINE：" + LINE,
+"LINE：" + LINE + INSTALL,
 
     dream:
 "🌙 夢境圖書館\n\n" +
@@ -136,15 +152,15 @@
 "記錄你的夢，AI 幫你看見夢裡的訊息。\n\n" +
 "一個專屬於你的夢境收藏空間。\n\n" +
 "👉 免費體驗：jacky95188888.github.io/dream-library/\n\n" +
-"LINE：" + LINE,
+"LINE：" + LINE + INSTALL,
 
     toolbox:
 "🧰 萬能工具箱\n\n" +
 "一支手機就能用的 AI 工具箱，免安裝、打開就能玩。\n" +
 "我是三寶爸，用一支 iPhone 做出來的。\n\n" +
-"👉 試用連結：【這裡換成你的新連結】\n" +
+"👉 試用連結：" + TOOLBOX + "\n" +
 "解鎖碼：MING872\n\n" +
-"LINE：" + LINE,
+"LINE：" + LINE + INSTALL,
 
     teaching:
 "📱 一支手機，零基礎，做出自己的 AI 工具\n\n" +
@@ -153,7 +169,7 @@
 "從零做出了好幾個上線的 AI 工具。\n\n" +
 "如果你也想學，這條路我走過，可以帶你走。\n" +
 "想了解的留言「+1」，我私訊你 🙌\n\n" +
-"LINE：" + LINE
+"LINE：" + LINE + INSTALL
   };
 
   function loadTpl(key) {
@@ -170,11 +186,16 @@
     var ok = false;
     try { ok = document.execCommand("copy"); } catch (e) {}
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(txt).then(function(){ showToast("已複製！"); }).catch(function(){ if(ok) showToast("已複製！"); });
+      navigator.clipboard.writeText(txt).then(function(){ buzz(); showToast("已複製！"); }).catch(function(){ if(ok){ buzz(); showToast("已複製！"); } });
     } else {
+      if (ok) buzz();
       showToast(ok ? "已複製！" : "請手動長按複製");
     }
-    if (navigator.clipboard) {} else if (ok) {}
+  }
+
+  // 複製成功的觸覺回饋（Android Chrome 有效；iOS Safari 不支援，會自動略過）
+  function buzz() {
+    if (navigator.vibrate) navigator.vibrate(50);
   }
 
   function showToast(msg) {
